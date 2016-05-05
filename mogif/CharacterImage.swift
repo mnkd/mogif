@@ -12,32 +12,24 @@ import CoreGraphics
 struct CharacterImage {
   enum Error: ErrorType {
     case CreateFont
+    case CreateBitmapImageRep
   }
   
   private let character: Character
   private let fontName = "HiraMinProN-W3"
-  private let nsImage: NSImage
   private let size: CGSize
-  
-  private var imageRep: NSBitmapImageRep? {
-    guard let imageData = nsImage.TIFFRepresentation else {
-      print("[Error] No TIFFRepresentation: \(character)")
-      exit(EXIT_FAILURE)
-    }
-    return NSBitmapImageRep(data:imageData)
-  }
+  private var bitmap: NSBitmapImageRep?
   
   private var imageData: NSData? {
-    return imageRep?.representationUsingType(.NSGIFFileType, properties: [:])
+    return bitmap?.representationUsingType(.NSGIFFileType, properties: [:])
   }
   
   var cgImage: CGImage? {
-    return imageRep?.CGImage
+    return bitmap?.CGImage
   }
   
-  init?(character char: Character, size: CGSize = CGSize(width: 128, height: 128)) {
+  init?(character char: Character, size: NSSize = NSSize(width: 128, height: 128)) {
     self.size = size
-    nsImage   = NSImage(size: size)
     character = char
     
     do {
@@ -47,27 +39,48 @@ struct CharacterImage {
     }
   }
   
-  private func generate() throws {
-    let textRect = NSRect(x: 0, y: 0, width: size.width, height: size.height)
-    let textStyle = NSMutableParagraphStyle()
-    textStyle.alignment = .Center
-    
+  private mutating func generate() throws {
     let fontSize = CGFloat(floor(size.width * 0.9))
     guard let font = NSFont(name: fontName, size: fontSize) else {
       print("[Error] Could not create NSFont: \(fontName)")
       throw Error.CreateFont
     }
-    
-    let textFontAttributes = [NSFontAttributeName: font, NSForegroundColorAttributeName: NSColor.blackColor(), NSParagraphStyleAttributeName: textStyle]
-    
+
+    let textRect = NSRect(x: 0, y: 0, width: size.width, height: size.height)
+    let textStyle = NSMutableParagraphStyle()
+    textStyle.alignment = .Center
+    let textAttributes = [NSFontAttributeName: font,
+                          NSForegroundColorAttributeName: NSColor.blackColor(),
+                          NSParagraphStyleAttributeName: textStyle]
+
+    // Prepare bitmap
+    guard let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil,
+                                        pixelsWide: Int(size.width),
+                                        pixelsHigh: Int(size.height),
+                                        bitsPerSample: 8,
+                                        samplesPerPixel: 4,
+                                        hasAlpha: true,
+                                        isPlanar: false,
+                                        colorSpaceName: NSDeviceRGBColorSpace,
+                                        bytesPerRow: 0,
+                                        bitsPerPixel: 0) else {
+      print("[Error] Could not create BitmapImageRep: \(fontName)")
+      throw Error.CreateBitmapImageRep
+    }
+    bitmap.size = size
+
     // Drawing
-    nsImage.lockFocus()
-    String(character).drawInRect(textRect, withAttributes: textFontAttributes)
-    nsImage.unlockFocus()
+    NSGraphicsContext.saveGraphicsState()
+    NSGraphicsContext.setCurrentContext(NSGraphicsContext(bitmapImageRep: bitmap))
+    String(character).drawInRect(textRect, withAttributes: textAttributes)
+    NSGraphicsContext.restoreGraphicsState()
+
+    self.bitmap = bitmap
   }
   
   func debugSaveImage() {
-    let path = NSHomeDirectory() + "/Desktop/\(character).gif"
+    let cwd = NSFileManager.defaultManager().currentDirectoryPath
+    let path = "\(cwd)/\(character).gif"
     do {
       try imageData?.writeToFile(path, options: .AtomicWrite)
     } catch {
