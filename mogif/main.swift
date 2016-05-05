@@ -11,7 +11,7 @@ import Foundation
 var settings = GeneratorSettings()
 settings.parseOptions()
 
-var generator = Generator(settings: settings)
+let generator = Generator(settings: settings)
 generator.generate()
 
 exit(EXIT_SUCCESS)
