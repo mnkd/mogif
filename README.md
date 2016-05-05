@@ -35,3 +35,6 @@ Usage: mogif [options]
 2. `$ git submodile update`
 3. Open `mogif.xcodeproj`
 4. Build (command + B)
+
+# License
+[MIT](https://github.com/m-nakada/mogif/blob/master/LICENSE)
