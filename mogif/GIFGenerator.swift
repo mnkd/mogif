@@ -53,7 +53,7 @@ struct GIFGenerator {
         return url.absoluteString
       }()
       
-      print("Success!\n\(path)")
+      print("\(path)")
     } else {
       print("Fail!")
       exit(EXIT_FAILURE)
