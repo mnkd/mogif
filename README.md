@@ -5,7 +5,7 @@ mogif — a command for creating a animated GIF with characters for OS X.
 mogif requires OS X 10.11 or greater.
 
 # Installation
-To install the latest version of mogif, you can download [here]().
+To install the latest version of mogif, you can download [here](https://github.com/m-nakada/mogif/files/249881/mogif.zip).
 
 # Usage
 
