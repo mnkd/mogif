@@ -10,9 +10,8 @@ import AppKit
 import CoreGraphics
 
 struct CharacterImage {
-  enum Error: ErrorType {
-    case CreateFont
-    case CreateBitmapImageRep
+  enum CreationError: Error {
+    case createFont, createBitmapImageRep
   }
   
   private let character: Character
@@ -20,12 +19,12 @@ struct CharacterImage {
   private let size: CGSize
   private var bitmap: NSBitmapImageRep?
   
-  private var imageData: NSData? {
-    return bitmap?.representationUsingType(.NSGIFFileType, properties: [:])
+  private var imageData: Data? {
+    return bitmap?.representation(using: .gif , properties: [:])
   }
   
   var cgImage: CGImage? {
-    return bitmap?.CGImage
+    return bitmap?.cgImage
   }
   
   init?(character char: Character, size: NSSize = NSSize(width: 128, height: 128)) {
@@ -43,15 +42,15 @@ struct CharacterImage {
     let fontSize = CGFloat(floor(size.width * 0.9))
     guard let font = NSFont(name: fontName, size: fontSize) else {
       print("[Error] Could not create NSFont: \(fontName)")
-      throw Error.CreateFont
+      throw CreationError.createFont
     }
 
     let textRect = NSRect(x: 0, y: 0, width: size.width, height: size.height)
     let textStyle = NSMutableParagraphStyle()
-    textStyle.alignment = .Center
-    let textAttributes = [NSFontAttributeName: font,
-                          NSForegroundColorAttributeName: NSColor.blackColor(),
-                          NSParagraphStyleAttributeName: textStyle]
+    textStyle.alignment = .center
+    let textAttributes = [NSAttributedStringKey.font: font,
+                          NSAttributedStringKey.foregroundColor: NSColor.black,
+                          NSAttributedStringKey.paragraphStyle: textStyle]
 
     // Prepare bitmap
     guard let bitmap = NSBitmapImageRep(bitmapDataPlanes: nil,
@@ -61,30 +60,30 @@ struct CharacterImage {
                                         samplesPerPixel: 4,
                                         hasAlpha: true,
                                         isPlanar: false,
-                                        colorSpaceName: NSDeviceRGBColorSpace,
+                                        colorSpaceName: NSColorSpaceName.deviceRGB,
                                         bytesPerRow: 0,
                                         bitsPerPixel: 0) else {
       print("[Error] Could not create BitmapImageRep: \(fontName)")
-      throw Error.CreateBitmapImageRep
+      throw CreationError.createBitmapImageRep
     }
     bitmap.size = size
 
     // Drawing
     NSGraphicsContext.saveGraphicsState()
-    NSGraphicsContext.setCurrentContext(NSGraphicsContext(bitmapImageRep: bitmap))
-    String(character).drawInRect(textRect, withAttributes: textAttributes)
+    NSGraphicsContext.current = NSGraphicsContext(bitmapImageRep: bitmap)
+    String(character).draw(in: textRect, withAttributes: textAttributes)
     NSGraphicsContext.restoreGraphicsState()
 
     self.bitmap = bitmap
   }
   
   func debugSaveImage() {
-    let cwd = NSFileManager.defaultManager().currentDirectoryPath
-    let path = "\(cwd)/\(character).gif"
+    let cwd = FileManager.default.currentDirectoryPath
+    let url = URL(fileURLWithPath: "\(cwd)/\(character).gif")
     do {
-      try imageData?.writeToFile(path, options: .AtomicWrite)
+      try imageData?.write(to: url)
     } catch {
-      print("[Error] Saving file at path: \(path) with error: \(error)")
+      print("[Error] Saving file at path: \(url.absoluteString) with error: \(error)")
       exit(EXIT_FAILURE)
     }
   }

@@ -30,7 +30,7 @@ struct Generator {
       exit(EXIT_FAILURE)
     }
     
-    let gif = GIFGenerator(images: images, loopCount: settings.loopCount, frameDelay: settings.frameDelay, url: settings.outputURL!)
+    let gif = GIFGenerator(images: images, loopCount: settings.loopCount, frameDelay: settings.frameDelay, url: settings.outputURL! as URL)
     gif.generate()
   }
 }
