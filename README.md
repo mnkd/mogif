@@ -1,8 +1,9 @@
 # mogif
-mogif — a command for creating a animated GIF with characters for OS X.
+mogif — a command for creating a animated GIF with characters for macOS.
 
 # Requirements
-mogif requires OS X 10.11 or greater.
+* mogif requires macOS 10.12 or greater.
+* Xcode 9 + Swift 4
 
 # Installation
 To install the latest version of mogif, you can download [here](https://github.com/m-nakada/mogif/releases).
@@ -28,13 +29,13 @@ Usage: mogif [options]
 - `$ mogif -c ABC`
 - `$ mogif -f 0.5 -c 🙎🙆`
 - `$ mogif -f 0.8 -c 😴💤`
+- `$ mogif -f 0.3 -c 🌕🌖🌗🌘🌑🌒🌓🌔`
 
 # Build
 
-1. `$ git submodule init`
-2. `$ git submodile update`
-3. Open `mogif.xcodeproj`
-4. Build (command + B)
+```
+$ swift build
+```
 
 # License
 [MIT](https://github.com/m-nakada/mogif/blob/master/LICENSE)
