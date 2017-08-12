@@ -1,0 +1,16 @@
+{
+  "object": {
+    "pins": [
+      {
+        "package": "CommandLine",
+        "repositoryURL": "https://github.com/pdesantis/CommandLine",
+        "state": {
+          "branch": "swift4",
+          "revision": "bf0e1eb1df769cadea8bae75c4acf1c140aa2449",
+          "version": null
+        }
+      }
+    ]
+  },
+  "version": 1
+}
